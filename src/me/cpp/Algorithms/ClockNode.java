@@ -2,23 +2,27 @@ package me.cpp.Algorithms;
 
 public class ClockNode {
 	
-	private int[] data;
+	private String data;
+	private int index;
 	private ClockNode next;
 	
-	public ClockNode(int[] data) {
+	public ClockNode(String data, int index) {
 		this.data = data;
+		this.index = index;
 	}
 	
-	public ClockNode(int[] data, ClockNode next) {
+	public ClockNode(String data, int index, ClockNode next) {
 		this.data = data;
 		this.next = next;
+		this.index = index;
+		
 	}
 
-	public int[] getData() {
+	public String getData() {
 		return data;
 	}
 
-	public void setData(int[] data) {
+	public void setData(String data) {
 		this.data = data;
 	}
 
@@ -28,5 +32,13 @@ public class ClockNode {
 
 	public void setNext(ClockNode next) {
 		this.next = next;
+	}
+	
+	public void setIndex(int index) {
+		this.index = index;
+	}
+	
+	public int getIndex() {
+		return index;
 	}
 }

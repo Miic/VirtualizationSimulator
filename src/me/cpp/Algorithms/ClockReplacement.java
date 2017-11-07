@@ -44,12 +44,12 @@ public class ClockReplacement {
 	
 	public void add(int valid, int ref, int dirty, String pageFrame) {
 		ClockNode startNode = pointer;
-		boolean flag = false;
+		boolean flag = true;
 		do {
 			if (table.getValidBit(pointer.getIndex()) == 0) {
 				table.setEntry(pointer.getIndex(), valid, ref, dirty, pageFrame);
 				pointer.setData(table.getEntry(pointer.getIndex()));
-				flag = true;
+				flag = false;
 				break;
 			}
 			pointer = pointer.getNext();

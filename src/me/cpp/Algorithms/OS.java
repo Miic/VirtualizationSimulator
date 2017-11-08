@@ -10,6 +10,7 @@ public class OS {
 	private CPU processor;
 	private VPageTable pageTable;
 	private PhysicalMemory memory;
+	private ClockReplacement alg;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -24,6 +25,8 @@ public class OS {
 		processor = new CPU();
 		pageTable = new VPageTable();
 		memory = new PhysicalMemory();
+		
+		alg = new ClockReplacement(pageTable, memory);
 		// System.out.println("The page table content is: ");
 		// System.out.println(pageTable);
 		try {

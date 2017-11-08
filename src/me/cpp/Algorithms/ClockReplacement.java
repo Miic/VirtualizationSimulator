@@ -2,19 +2,20 @@ package me.cpp.Algorithms;
 
 public class ClockReplacement {
 	private ClockNode pointer;
-	
 	private ClockNode sudoHead;
 	private ClockNode sudoTail;
 	
 	private VPageTable table;
+	private PhysicalMemory memory;
 	
 	/**
 	 * Creates an internal list version of a passed VPageTable
 	 * @param table VPageTable used 
 	 */
 	
-	public ClockReplacement(VPageTable table) {
+	public ClockReplacement(VPageTable table, PhysicalMemory memory) {
 		this.table = table;
+		this.memory = memory;
 		String[] data = table.toArray();
 		if (data.length > 0) {
 			sudoHead = new ClockNode(data[0], 0);
@@ -47,6 +48,14 @@ public class ClockReplacement {
 		boolean flag = true;
 		do {
 			if (table.getValidBit(pointer.getIndex()) == 0) {
+				//Dirty bit handling
+				if (table.getDirtyBit(pointer.getIndex()) == 1) {
+					//I'm not sure if the first parameter is in hex.
+					//Not sure what to put for offset param here
+					//Not sure what to put for data here
+					
+					//memory.setData(table.getPageFrame(pointer.getIndex()), 0);
+				}
 				table.setEntry(pointer.getIndex(), valid, ref, dirty, pageFrame);
 				pointer.setData(table.getEntry(pointer.getIndex()));
 				flag = false;

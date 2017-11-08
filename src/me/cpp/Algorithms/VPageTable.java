@@ -2,29 +2,13 @@ package me.cpp.Algorithms;
 
 public class VPageTable {
 	private String[] pageTable;
-	private ClockReplacement alg;
 	
 	public VPageTable() {
 		pageTable = new String[256];
 		for (int i=0;i<pageTable.length;i++) {
 			pageTable[i] = "0000000";
 		}
-		alg = new ClockReplacement(this);
 	}
-	
-	
-	/**
-	 * Adds the Entry to the next Valid spot via ClockReplacement alg
-	 * @param index The entry to update
-	 * @param valid The valid bit of the entry
-	 * @param ref The ref bit of the entry
-	 * @param dirty The dirty bit of the entry
-	 * @param pageFrame The page frame of the entry
-	 */
-	public void addEntry(int valid, int ref, int dirty, String pageFrame) {
-		alg.add(valid, ref, dirty, pageFrame);
-	}
-	
 	
 	/**
 	 * Set the virtual page entry, Protected as internal state must not be accessed from the outside

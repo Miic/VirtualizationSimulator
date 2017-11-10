@@ -22,14 +22,13 @@ public class CPU {
     /**
      * Setting an entry on the Virtual page table
      * @param os The OS object to get the virtual page table instance object
-     * @param entry The entry on the v-page table to update
      * @param valid The valid bit of the page table entry
      * @param ref The ref bit of the page table entry
      * @param dirty The dirty bit of the page table entry
      * @param pageFrame The page frame the virtual page points to in the physical memory
      */
-    public void PTE(OS os, int entry, int valid, int ref, int dirty, String pageFrame) {
-    	os.getPageTable().setEntry(entry, valid, ref, dirty, pageFrame);
+    public void PTE(OS os, int valid, int ref, int dirty, String pageFrame) {
+    	os.getAlg().add(valid, ref, dirty, pageFrame);
     	
     }
     

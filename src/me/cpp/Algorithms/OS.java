@@ -37,7 +37,7 @@ public class OS {
 				deleteIfExist(file);
 				copyFile(source, file);  // Copy to new location so we don't overwrite the original files
 				//input = new Scanner(file);	
-				processor.PTE(this, i, 0, 0, 1, "0000");  // Test writing to the Virtual Page Table
+				processor.PTE(this, 0, 0, 1, "0000");  // Test writing to the Virtual Page Table
 			}
 			/***
 			while (input.hasNextLine()) {
@@ -79,6 +79,14 @@ public class OS {
 	 */
 	public PhysicalMemory getMemory() {
 		return memory;
+	}
+	
+	/**
+	 * return the ClockReplacement Handler
+	 * @return The ClockReplacement instance object
+	 */
+	public ClockReplacement getAlg() {
+		return alg;
 	}
 	
 	/**

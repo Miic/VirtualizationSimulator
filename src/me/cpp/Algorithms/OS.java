@@ -37,7 +37,10 @@ public class OS {
 				deleteIfExist(file);
 				copyFile(source, file);  // Copy to new location so we don't overwrite the original files
 				//input = new Scanner(file);	
-				processor.PTE(this, 0, 0, 1, "0000");  // Test writing to the Virtual Page Table
+				//processor.PTE(this, 0, 0, 1, "0000");  // Test writing to the Virtual Page Table
+				
+				//Initialize pageTable state
+				pageTable.setEntry(i, 0, 0, 1, "0000");
 			}
 			/***
 			while (input.hasNextLine()) {

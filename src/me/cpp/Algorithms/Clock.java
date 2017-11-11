@@ -19,11 +19,10 @@ public class Clock {
 		this.memory = memory;
 		this.processor = processor;
 		String[][] data = memory.toArray();
-		System.out.println("memory.length: " + memory.toArray().length);
 		if ( memory.toArray().length > 0) {
 			sudoHead = new ClockNode(0);
 			pointer = sudoHead;
-			for(int i = 1; i < data.length - 1; i++) {
+			for(int i = 1; i <= data.length - 1; i++) {
 				ClockNode temp = new ClockNode(i);
 				pointer.setNext(temp);
 				pointer = temp;
@@ -38,15 +37,23 @@ public class Clock {
 		}
 	} 
 	
+	/**
+	 * Used to determine where to place the new page into memory. 
+	 * Every frame to put into memory requires to go through this method
+	 * @param os The OS instance object
+	 * @param vPage The vPage to place into page frame in memory
+	 * @return The page frame in phy memory
+	 */
 	public int newPage(OS os, int vPage) {
 		int pageFrame = -1;
 		int temp = -1;
 		if ( !memory.memFull ) {
 			// Memory is not full
 			pageFrame = memory.newPage();
-			pointer.setVPageFrame(pageFrame);
+			pointer.setVPageFrame(vPage);
 			temp = pointer.getIndex();
 			pointer = pointer.getNext();
+			memory.pageTaken(pageFrame);
 		}
 		else {
 			// Memory is full, swapping required
@@ -55,14 +62,19 @@ public class Clock {
 				int ref = table.getRefBit(pointer.getVPageFrame());
 				if ( ref == 0 ) {
 					// Swapping this page out
+					//System.out.println("swapping out frame: " + pointer.getIndex());
+					//System.out.println("Swapping out vpage frame: " + pointer.getVPageFrame());
 					int dirty = table.getDirtyBit(pointer.getVPageFrame());
 					if ( dirty == 1 ) {
 						// Data is dirty, writing to disk
+						//System.out.println("evicting page frame: " + pointer.getIndex());
+						//System.out.println("Writing " + pointer.getVPageFrame() + " back to disk");
 						os.writePageFile(numconv.getHex(pointer.getVPageFrame(), 2));
+						//System.out.println("Writing " + pointer.getVPageFrame() + " to page file");
 					}
 					// Safety precaution to set the valid bit to 0, meaning the data is no longer trustworthy
 					table.setValidBit(pointer.getVPageFrame(), 0);
-					processor.TLBsetValidBit(pointer.getVPageFrame(), 0);
+					processor.TLBsetValidBit(numconv.getBinary(pointer.getVPageFrame(), 8), 0);
 					pointer.setVPageFrame(vPage);
 					temp = pointer.getIndex();
 					pointer = pointer.getNext();
@@ -75,38 +87,5 @@ public class Clock {
 		return temp;
 	}
 	
-	/**
-	 * Initiates Clock Replacement algorithm, signature intentionally designed to match VPageTable setEntry method.
-	 * @param valid Sets Valid Bit - This is usually 1
-	 * @param ref Sets Reference bit
-	 * @param dirty Sets Dirty Bit
-	 * @param pageFrame Sets PageFrameAddress
-	 */
 	
-	public void add(int valid, int ref, int dirty, String pageFrame) {
-		ClockNode startNode = pointer;
-		boolean flag = true;
-		do {
-			if (table.getValidBit(pointer.getIndex()) == 0) {
-				//Dirty bit handling
-				if (table.getDirtyBit(pointer.getIndex()) == 1) {
-					//I'm not sure if the first parameter is in hex.
-					//Not sure what to put for offset param here
-					//Not sure what to put for data here
-					
-					//memory.setData(table.getPageFrame(pointer.getIndex()), 0);
-				}
-				table.setEntry(pointer.getIndex(), valid, ref, dirty, pageFrame);
-				pointer.setData(table.getEntry(pointer.getIndex()));
-				flag = false;
-				break;
-			}
-			pointer = pointer.getNext();
-		} while (pointer != startNode);
-		
-		if (flag) {
-			table.setEntry(startNode.getIndex(), valid, ref, dirty, pageFrame);
-			pointer.setData(table.getEntry(startNode.getIndex()));
-		}
-	}
 }

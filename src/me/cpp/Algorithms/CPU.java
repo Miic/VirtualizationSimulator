@@ -17,18 +17,7 @@ public class CPU {
     	}
     }
     
-    /**
-     * Setting an entry on the Virtual page table
-     * @param os The OS object to get the virtual page table instance object
-     * @param valid The valid bit of the page table entry
-     * @param ref The ref bit of the page table entry
-     * @param dirty The dirty bit of the page table entry
-     * @param pageFrame The page frame the virtual page points to in the physical memory
-     */
-    public void PTE(OS os, int valid, int ref, int dirty, String pageFrame) {
-    	os.getAlg().add(valid, ref, dirty, pageFrame);
-    	
-    }
+
     
     /**
      * The MMU that reads instruction from test file
@@ -51,7 +40,7 @@ public class CPU {
 					data = this.readAddress(os, addr);
 					if ( data.compareTo("false") != 0 ) {
 						// Data was successfully read, set ref bit to 1 in both page table and tlb
-						System.out.println("updating vpagetable and tlb");
+						//System.out.println("updating vpagetable and tlb");
 						os.getPageTable().setRefBit(numconv.getDecimal(addr.substring(0,2), 16), 1);
 						this.TLBsetRefBit(numconv.getBinary(numconv.getDecimal(addr.substring(0, 2), 16), 8), 1);
 					}
@@ -60,9 +49,6 @@ public class CPU {
 				else {
 					addr = input.nextLine();
 					data = input.nextLine();
-					// To-do writing to memory
-					// this.writeToMemory(os, addr, data); 
-					// System.out.println(data + " has been written to memory addr: " + addr);
 					this.writeAddress(os, addr, data);
 				}
 				counter++;
@@ -76,22 +62,25 @@ public class CPU {
 		}
     }
     
+    /**
+     * Writing data by address. First check TLB, then virtual page table, finally memory
+     * @param os The OS instance object to retrieve other class instances
+     * @param addr The address to retrieve
+     * @param data The data to be written
+     * @return True on success false on failure
+     */
     private boolean writeAddress(OS os, String addr, String data) {
-    	System.out.println("addr: " + addr);
-    	System.out.println("WriteAddress: addr ==> " + addr.substring(0,2) + " | offset: " + addr.substring(2) );
     	String vPage = addr.substring(0, 2);
     	String offset = addr.substring(2);
     	int result;
     	for (int i=0;i<TLB.length;i++) {
     		if ( TLB[i].substring(0, 8).compareTo(numconv.getBinary(numconv.getDecimal(vPage, 16), 8)) == 0 ) {
     			// Entry is in TLB
-    			System.out.println("Entry is in TLB");
     			// If the valid bit is 1 the data is in memory, we can use
     			if ( TLB[i].substring(8, 9).compareTo("1") == 0 ) {
-    				System.out.println("Entry is valid");
     				// Writing to memory based on the record in TLB
     				os.getMemory().setData(numconv.getDecimal(TLB[i].substring(11), 2), numconv.getDecimal(offset, 16), data);
-    				System.out.println("Successfully written " + data + " to address==> " + addr);
+    				//System.out.println("Successfully written " + data + " to address==> " + addr);
     				// Updating the ref and valid bit on both the TLB and vpagetable
     				this.TLBsetRefBit(i, 1);
     				os.getPageTable().setRefBit(numconv.getDecimal(vPage, 16), 1);
@@ -104,12 +93,12 @@ public class CPU {
     	// Entry is not in TLB, trying V-Page table now
     	// SOFT MISS occurs here
     	String temp = os.getPageTable().getEntry(numconv.getDecimal(vPage, 16));
-    	System.out.println("soft miss occurred");
+    	//System.out.println("soft miss occurred");
     	// If the valid bit is 1, the data is in memory, NO HARD MISS
     	if ( temp.substring(0, 1).compareTo("1") == 0 ) {
     		// Entry is in Virtual page table and valid
     		os.getMemory().setData(numconv.getDecimal(temp.substring(3), 2), numconv.getDecimal(offset, 16), data);
-    		System.out.println("Successfully written " + data + " to address==> " + addr);
+    		//System.out.println("Successfully written " + data + " to address==> " + addr);
     		// Updating the ref and valid bit on vpagetable
     		os.getPageTable().setRefBit(numconv.getDecimal(vPage, 16), 1);
     		os.getPageTable().setDirtyBit(numconv.getDecimal(vPage, 16), 1);
@@ -119,14 +108,14 @@ public class CPU {
     	// The data is not in physical memory, load from disk
     	// HARD MISS occurs here
     	else {
-    		System.out.println("Hard missed occurred as well");
+    		//System.out.println("Hard missed occurred as well");
     		//  Entry in v page table is not valid, reading from disk
     		result = readInPageFile(os, vPage);
     		// To-do, read again after reading from disk into physical memory
     		if ( result > 0 ) {
     			// Writing to the newly imported page
     			os.getMemory().setData(numconv.getDecimal(TLB[result].substring(11), 2), numconv.getDecimal(offset,  16), data);
-    			System.out.println("Successfully written " + data + " to address==> " + addr);
+    			//System.out.println("Successfully written " + data + " to address==> " + addr);
     			// Updating the ref and valid bit on vpagetable
     			os.getPageTable().setRefBit(numconv.getDecimal(vPage, 16), 1);
     			os.getPageTable().setDirtyBit(numconv.getDecimal(vPage, 16), 1);
@@ -154,11 +143,11 @@ public class CPU {
     	for (int i=0;i<TLB.length;i++) {
     		if ( TLB[i].substring(0, 8).compareTo(numconv.getBinary(numconv.getDecimal(vPage, 16), 8)) == 0 ) {
     			//  Entry is in TLB
-    			System.out.println("Entry is in TLB");
+    			//System.out.println("Entry is in TLB");
     			// If the valid bit is 1 the data is memory, we can use. 
     			//if ( TLB[i].substring(8, 9).compareTo("1") == 0 && TLB[i].substring(10, 11).compareTo("0") == 0) {
     			if ( TLB[i].substring(8, 9).compareTo("1") == 0 ) {	
-    				System.out.println("Entry is valid");
+    				//System.out.println("Entry is valid");
     				return os.getMemory().getData(numconv.getDecimal(TLB[i].substring(11), 2), numconv.getDecimal(offset, 16));
     			}
     		}
@@ -166,7 +155,7 @@ public class CPU {
     	//  Entry is not in TLB, trying V-page table now
     	//  SOFT MISS occurs here
     	String temp = os.getPageTable().getEntry(numconv.getDecimal(vPage, 16));
-    	System.out.println("Soft miss occurred");
+    	//System.out.println("Soft miss occurred");
     	// If the valid bit is 1 the data is in memory, NO HARD MISS.
     	//if (temp.substring(0, 1).compareTo("1") == 0 && temp.substring(2, 3).compareTo("0") == 0) {
     	if (temp.substring(0, 1).compareTo("1") == 0 ) {
@@ -177,11 +166,11 @@ public class CPU {
     	// HARD MISS occurs here
     	
     	else {
-    		System.out.println("Hard missed occurred as well");
+    		//System.out.println("Hard missed occurred as well");
     		//  Entry in v page table is not valid, reading from disk
     		result = readInPageFile(os, vPage);
     		// To-do, read again after reading from disk into physical memory
-    		if ( result > 0 ) {
+    		if ( result >= 0 ) {
     			return os.getMemory().getData(numconv.getDecimal(TLB[result].substring(11), 2), numconv.getDecimal(offset, 16));
     		}
     		else {
@@ -214,10 +203,10 @@ public class CPU {
     public int TLBSetEntry(String vPage, int valid, int ref, int dirty, String pageFrame) {
     	String TLBEntry = vPage + Integer.toString(valid) + Integer.toString(ref) + Integer.toString(dirty) + pageFrame;
     	// System.out.println("Adding: " + TLBEntry + " to TLB entry " + entry);
+    	int tlbPoint = tlbPointer;
     	this.tlbPointer = (this.tlbPointer + 1) % 8; 
-    	
-    	TLB[tlbPointer] = TLBEntry;
-    	return tlbPointer;
+    	TLB[tlbPoint] = TLBEntry;
+    	return tlbPoint;
     	
     }
     
@@ -227,9 +216,10 @@ public class CPU {
      * @param valid The valid bit
      */
     public void TLBsetValidBit(int entry, int valid) {
+    	System.out.println("trying to set valid bit in TLB for entry " + entry);
     	String tempEntry = TLB[entry];
     	TLB[entry] = tempEntry.substring(0,8) + Integer.toString(valid) + tempEntry.substring(9);
-    	System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
+    	//System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
     	
     }
     
@@ -241,7 +231,7 @@ public class CPU {
     public void TLBsetRefBit(int entry, int ref) {
     	String tempEntry = TLB[entry];
     	TLB[entry] = tempEntry.substring(0,9) + Integer.toString(ref) + tempEntry.substring(10);
-    	System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
+    	//System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
     }
     
     /**
@@ -252,7 +242,7 @@ public class CPU {
     public void TLBsetDirtyBit(int entry, int dirty) {
     	String tempEntry = TLB[entry];
     	TLB[entry] = tempEntry.substring(0,10) + Integer.toString(dirty) + tempEntry.substring(11);
-    	System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
+    	//System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
     }
     
     /**
@@ -263,7 +253,7 @@ public class CPU {
     public void TLBsetPageFrame(int entry, String pageFrame) {
     	String tempEntry = TLB[entry];
     	TLB[entry] = tempEntry.substring(0,11) + pageFrame;
-    	System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
+    	//System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
     }
     
     /**
@@ -274,7 +264,7 @@ public class CPU {
     public void TLBsetVPage(int entry, String vPage) {
     	String tempEntry = TLB[entry];
     	TLB[entry] = vPage + tempEntry.substring(8);
-    	System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
+    	//System.out.println("TLB entry " + entry + " has been updated to " + TLB[entry]);
     }
     
     /**

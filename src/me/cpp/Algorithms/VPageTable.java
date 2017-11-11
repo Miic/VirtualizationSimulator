@@ -32,7 +32,7 @@ public class VPageTable {
 	protected void setValidBit(int index, int valid) {
     	String tempEntry = pageTable[index];
     	pageTable[index] = Integer.toString(valid) + tempEntry.substring(1);
-    	System.out.println("Page Table entry " + index + " has been updated to " + pageTable[index]);
+    	//System.out.println("Page Table entry " + index + " has been updated to " + pageTable[index]);
     }
 	
 	/**
@@ -65,7 +65,7 @@ public class VPageTable {
 	protected void setPageFrame(int index, String pageFrame) {
 		String tempEntry = pageTable[index];
 		pageTable[index] = tempEntry.substring(0, 3) + pageFrame;
-		System.out.println("Page Table entry " + index + " has been updated to " + pageTable[index]);
+		//System.out.println("Page Table entry " + index + " has been updated to " + pageTable[index]);
 	}
 	
 	

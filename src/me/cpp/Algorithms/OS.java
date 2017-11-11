@@ -47,10 +47,7 @@ public class OS {
 				pageTable.setEntry(i, 0, 0, 0, "0000");
 			}
 			alg = new Clock(pageTable, memory, processor);
-			/***
-			while (input.hasNextLine()) {
-				System.out.println(input.nextLine());
-			}**/
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -90,8 +87,8 @@ public class OS {
 	}
 	
 	/**
-	 * return the ClockReplacement Handler
-	 * @return The ClockReplacement instance object
+	 * return the Clock Handler
+	 * @return The Clock instance object
 	 */
 	public Clock getAlg() {
 		return alg;
@@ -119,25 +116,20 @@ public class OS {
 		Files.deleteIfExists(dest.toPath());
 	}
 	
+	/**
+	 * REad page file from disk into memory
+	 * @param filename The page file to read in
+	 * @return The TLB entry the new page in stored in
+	 */
 	public int readPageFile(String filename) {
     	int tlbEntry = -1;
     	try {
     		File file = new File("src/me/cpp/Algorithms/pages/" + filename + ".pg");
         	Scanner input = new Scanner(file);
-        	//filename = filename.substring(0, 2);
         	int offset = 0;
         	int pageFrame = -1;
-        	/**if ( !memory.memFull ) {
-        		//pageFrame = numconv.getDecimal(memory.newPage(), 2);
-        		
-        	}
-        	else {
-        		// memory is full, call Clock replacement to make a new spot in memory and return the new spot frame number
-        		// Format: pageFrame = alg.makePageSlot()
-        		
-        	}**/
-        	pageFrame = alg.newPage(this, numconv.getDecimal(filename, 16));
         	
+        	pageFrame = alg.newPage(this, numconv.getDecimal(filename, 16));
         	while ( input.hasNextLine() ) {
         		memory.setData(pageFrame, offset, input.nextLine());
         		offset += 1;
@@ -156,6 +148,10 @@ public class OS {
     	}
 	}
 	
+	/**
+	 * Used to evict and write page file to disk
+	 * @param filename The page file to write back
+	 */
 	public void writePageFile(String filename) {
 		
 		try {
@@ -169,6 +165,10 @@ public class OS {
 		}
 	}
 	
+	/**
+	 * According to the project specs, "The OS should unset the r-bits of all 
+	 * table entries after the CPU processes five instructions" in the page replacement section
+	 */
 	public void resetRef() {
 		for (int i=0;i<pageTable.toArray().length;i++) {
 			pageTable.setRefBit(i, 0);

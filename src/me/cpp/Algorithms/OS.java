@@ -1,7 +1,10 @@
 package me.cpp.Algorithms;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.util.Scanner;
 
@@ -10,7 +13,8 @@ public class OS {
 	private CPU processor;
 	private VPageTable pageTable;
 	private PhysicalMemory memory;
-	private ClockReplacement alg;
+	//private ClockReplacement alg;
+	private Clock alg;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -26,7 +30,7 @@ public class OS {
 		pageTable = new VPageTable();
 		memory = new PhysicalMemory();
 		
-		alg = new ClockReplacement(pageTable, memory);
+		
 		// System.out.println("The page table content is: ");
 		// System.out.println(pageTable);
 		try {
@@ -40,8 +44,9 @@ public class OS {
 				//processor.PTE(this, 0, 0, 1, "0000");  // Test writing to the Virtual Page Table
 				
 				//Initialize pageTable state
-				pageTable.setEntry(i, 0, 0, 1, "0000");
+				pageTable.setEntry(i, 0, 0, 0, "0000");
 			}
+			alg = new Clock(pageTable, memory, processor);
 			/***
 			while (input.hasNextLine()) {
 				System.out.println(input.nextLine());
@@ -88,7 +93,7 @@ public class OS {
 	 * return the ClockReplacement Handler
 	 * @return The ClockReplacement instance object
 	 */
-	public ClockReplacement getAlg() {
+	public Clock getAlg() {
 		return alg;
 	}
 	
@@ -112,6 +117,62 @@ public class OS {
 	private void deleteIfExist(File dest) throws IOException {
 		
 		Files.deleteIfExists(dest.toPath());
+	}
+	
+	public int readPageFile(String filename) {
+    	int tlbEntry = -1;
+    	try {
+    		File file = new File("src/me/cpp/Algorithms/pages/" + filename + ".pg");
+        	Scanner input = new Scanner(file);
+        	//filename = filename.substring(0, 2);
+        	int offset = 0;
+        	int pageFrame = -1;
+        	/**if ( !memory.memFull ) {
+        		//pageFrame = numconv.getDecimal(memory.newPage(), 2);
+        		
+        	}
+        	else {
+        		// memory is full, call Clock replacement to make a new spot in memory and return the new spot frame number
+        		// Format: pageFrame = alg.makePageSlot()
+        		
+        	}**/
+        	pageFrame = alg.newPage(this, numconv.getDecimal(filename, 16));
+        	
+        	while ( input.hasNextLine() ) {
+        		memory.setData(pageFrame, offset, input.nextLine());
+        		offset += 1;
+        		
+        	}
+        	// Update the page table for this virtual page entry
+        	pageTable.setEntry(numconv.getDecimal(filename, 16), 1, 0, 0, numconv.getBinary(pageFrame, 4));
+        	// Possibly update the TLB as well
+        	tlbEntry = processor.TLBSetEntry(numconv.getBinary(Integer.parseInt(filename, 16), 8), 1, 0, 0, numconv.getBinary(pageFrame, 4));
+        	// Remove the following two lines in production
+        	return tlbEntry;
+        	
+    	} catch (Exception ex) {
+    		ex.printStackTrace();
+    		return tlbEntry;
+    	}
+	}
+	
+	public void writePageFile(String filename) {
+		
+		try {
+			File file = new File("src/me/cpp/Algorithms/pages/" + filename + ".pg");
+			FileOutputStream fos = new FileOutputStream(file);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+			bw.write(memory.toString(numconv.getDecimal(this.pageTable.getPageFrame(numconv.getDecimal(filename, 16)), 2)));
+			bw.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public void resetRef() {
+		for (int i=0;i<pageTable.toArray().length;i++) {
+			pageTable.setRefBit(i, 0);
+		}
 	}
 
 	

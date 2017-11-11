@@ -43,7 +43,7 @@ public class VPageTable {
 	protected void setRefBit(int index, int ref) {
     	String tempEntry = pageTable[index];
     	pageTable[index] = tempEntry.substring(0, 1) + Integer.toString(ref) + tempEntry.substring(2);
-    	System.out.println("Page Table entry " + index + " has been updated to " + pageTable[index]);
+    	//System.out.println("Page Table entry " + index + " has been updated to " + pageTable[index]);
     }
 	
 	/**
@@ -54,7 +54,7 @@ public class VPageTable {
 	protected void setDirtyBit(int index, int dirty) {
     	String tempEntry = pageTable[index];
     	pageTable[index] = tempEntry.substring(0, 2) + Integer.toString(dirty) + tempEntry.substring(3);
-    	System.out.println("Page Table entry " + index + " has been updated to " + pageTable[index]);
+    	//System.out.println("Page Table entry " + index + " has been updated to " + pageTable[index]);
     }
 	
 	/** 

@@ -2,10 +2,27 @@ package me.cpp.Algorithms;
 
 public class PhysicalMemory {
 	private String[][] memory;
+	private boolean[] memUsed;
+	public boolean memFull;
 	
 	public PhysicalMemory() {
 		memory = new String[16][256];  // Initialize the size of the physical memory
+		this.memUsed = new boolean[16];
+		for (int i=0;i<memory.length;i++) {
+			this.memUsed[i] = false;
+		}
+		memFull = false;
 		
+	}
+	
+	public int newPage() {
+		for (int i=0;i<memory.length;i++) {
+			if ( !this.memUsed[i] ) {
+				//return numconv.getBinary(i, 4);
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	/**
@@ -48,7 +65,21 @@ public class PhysicalMemory {
 		return memory[pageFrame][offset];
 	}
 	
+	/**
+	 * Get the memory array, Protected as internal state must not be accessed from the outside
+	 * @return The memory array
+	 */
+	protected final String[][] toArray() {
+		return memory;
+	}
 	
+	public String toString(int pageFrame) {
+		String output = "";
+		for (int i=0;i<memory[pageFrame].length;i++) {
+			output += (memory[pageFrame][i] + "\n");
+		}
+		return output;
+	}
 	
 	
 }

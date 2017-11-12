@@ -8,7 +8,11 @@ public class CPU {
 	// The following two variable cannot be used in production
 	private int tlbPointer;  // This is used to point to the current TLB, to keep track if FIFO TLB entries
     
-    public CPU() {
+	private int softmiss; //"register" holding number of softmiss ocurrances
+	private int hardmiss; //"register" holding number of hardmiss ocurrances
+	private int hit; //"register" holding number of hit ocurrances
+    
+	public CPU() {
     	tlbPointer = 0;  // Delete in production
     	TLB = new String[8];
     	for(int i=0;i<TLB.length;i++) {
@@ -17,9 +21,7 @@ public class CPU {
     	}
     }
     
-
-    
-    /**
+	/**
      * The MMU that reads instruction from test file
      * @param os The OS instance object to retrieve other class instances
      * @param filename The filename of the test file
@@ -78,6 +80,7 @@ public class CPU {
     			// Entry is in TLB
     			// If the valid bit is 1 the data is in memory, we can use
     			if ( TLB[i].substring(8, 9).compareTo("1") == 0 ) {
+    				hit++;
     				// Writing to memory based on the record in TLB
     				os.getMemory().setData(numconv.getDecimal(TLB[i].substring(11), 2), numconv.getDecimal(offset, 16), data);
     				//System.out.println("Successfully written " + data + " to address==> " + addr);
@@ -96,6 +99,7 @@ public class CPU {
     	//System.out.println("soft miss occurred");
     	// If the valid bit is 1, the data is in memory, NO HARD MISS
     	if ( temp.substring(0, 1).compareTo("1") == 0 ) {
+        	softmiss++;
     		// Entry is in Virtual page table and valid
     		os.getMemory().setData(numconv.getDecimal(temp.substring(3), 2), numconv.getDecimal(offset, 16), data);
     		//System.out.println("Successfully written " + data + " to address==> " + addr);
@@ -108,6 +112,7 @@ public class CPU {
     	// The data is not in physical memory, load from disk
     	// HARD MISS occurs here
     	else {
+    		hardmiss++;
     		//System.out.println("Hard missed occurred as well");
     		//  Entry in v page table is not valid, reading from disk
     		result = readInPageFile(os, vPage);
@@ -353,5 +358,31 @@ public class CPU {
     }
     
     
+    /**
+     * Returns the number of softmiss
+     * @return softmiss counter
+     */
+    public int getSoftmiss() {
+		return softmiss;
+	}
+
+
+    /**
+     * Returns the number of hardmiss
+     * @return hardmiss counter
+     */
+	public int getHardmiss() {
+		return hardmiss;
+	}
+
+
+    /**
+     * Returns the number of hit
+     * @return hit counter
+     */
+	public int getHit() {
+		return hit;
+	}
+
     
 }

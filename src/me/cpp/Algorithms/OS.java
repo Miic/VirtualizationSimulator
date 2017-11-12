@@ -3,6 +3,7 @@ package me.cpp.Algorithms;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
@@ -21,6 +22,7 @@ public class OS {
 		OS os = new OS();
 	    // Reading in modified test file (test5.txt) which is only reading from memory
 		os.loadFromFile(args[0]);
+		os.outputFile();
 	}
 	
 	public OS() {
@@ -174,7 +176,32 @@ public class OS {
 			pageTable.setRefBit(i, 0);
 		}
 	}
-
 	
+	/**
+	 * According to the project specs, "The OS should unset the r-bits of all 
+	 * table entries after the CPU processes five instructions" in the page replacement section
+	 */
 
+	/**
+	 * Outputs CSV File with Statistics
+	 */	
+	public File outputFile() {
+		File file = new File("output.csv");
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			FileWriter writer = new FileWriter(file);
+			writer.write("Hit,Soft,Hard\n");
+			writer.write(processor.getHit() + "," + processor.getSoftmiss() + "," + processor.getHardmiss() + "\n");
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return file;
+	}
 }

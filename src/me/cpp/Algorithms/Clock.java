@@ -9,6 +9,8 @@ public class Clock {
 	private PhysicalMemory memory;
 	private CPU processor;
 	
+	private int dirtyBitSet;
+	
 	/**
 	 * Creates an internal list version of a passed VPageTable
 	 * @param table VPageTable used 
@@ -18,6 +20,7 @@ public class Clock {
 		this.table = table;
 		this.memory = memory;
 		this.processor = processor;
+		this.dirtyBitSet = 0;
 		String[][] data = memory.toArray();
 		if ( memory.toArray().length > 0) {
 			sudoHead = new ClockNode(0);
@@ -36,6 +39,16 @@ public class Clock {
 			pointer = null;
 		}
 	} 
+	
+	/**
+	 * Returns the dirtyBitSet variable which is set if a page being evicted has the dirty bit set
+	 * @return dirtyBitSet
+	 */
+	public int getDirtyBitSet() {
+		int temp = this.dirtyBitSet;
+		this.dirtyBitSet = 0;
+		return temp;
+	}
 	
 	/**
 	 * Used to determine where to place the new page into memory. 
@@ -67,10 +80,8 @@ public class Clock {
 					int dirty = table.getDirtyBit(pointer.getVPageFrame());
 					if ( dirty == 1 ) {
 						// Data is dirty, writing to disk
-						//System.out.println("evicting page frame: " + pointer.getIndex());
-						//System.out.println("Writing " + pointer.getVPageFrame() + " back to disk");
+						this.dirtyBitSet = 1;
 						os.writePageFile(numconv.getHex(pointer.getVPageFrame(), 2));
-						//System.out.println("Writing " + pointer.getVPageFrame() + " to page file");
 					}
 					// Safety precaution to set the valid bit to 0, meaning the data is no longer trustworthy
 					table.setValidBit(pointer.getVPageFrame(), 0);

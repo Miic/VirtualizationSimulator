@@ -14,13 +14,13 @@ public class OS {
 	private CPU processor;
 	private VPageTable pageTable;
 	private PhysicalMemory memory;
-	//private ClockReplacement alg;
 	private Clock alg;
-
+	private String outputString;
+	private String testfileName;
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		OS os = new OS();
-	    // Reading in modified test file (test5.txt) which is only reading from memory
 		os.loadFromFile(args[0]);
 		os.outputFile();
 	}
@@ -31,21 +31,15 @@ public class OS {
 		processor = new CPU();
 		pageTable = new VPageTable();
 		memory = new PhysicalMemory();
+		outputString = "";
 		
-		
-		// System.out.println("The page table content is: ");
-		// System.out.println(pageTable);
 		try {
 			for (int i=0;i<256;i++) {
 				String filename = numconv.getHex(i, 2) + ".pg";
 				source = new File("src/me/cpp/Algorithms/page_files/" + filename);
 				file = new File("src/me/cpp/Algorithms/pages/" + filename);
 				deleteIfExist(file);
-				copyFile(source, file);  // Copy to new location so we don't overwrite the original files
-				//input = new Scanner(file);	
-				//processor.PTE(this, 0, 0, 1, "0000");  // Test writing to the Virtual Page Table
-				
-				//Initialize pageTable state
+				copyFile(source, file);
 				pageTable.setEntry(i, 0, 0, 0, "0000");
 			}
 			alg = new Clock(pageTable, memory, processor);
@@ -60,6 +54,7 @@ public class OS {
 	 * @param filename The filename of the test file in the test_files folder
 	 */
 	public void loadFromFile(String filename)  {
+		this.testfileName = filename.substring(0, filename.lastIndexOf('.'));
 		processor.MMUreadInstructionFromFile(this, "src/me/cpp/Algorithms/test_files/" + filename);	
 		
 	}
@@ -178,15 +173,25 @@ public class OS {
 	}
 	
 	/**
-	 * According to the project specs, "The OS should unset the r-bits of all 
-	 * table entries after the CPU processes five instructions" in the page replacement section
+	 * Used to generate the output csv string
+	 * @param addr The address being read or write
+	 * @param readWrite Read(0) instruction or Write(1) instruction
+	 * @param hit 1 if it was a hit
+	 * @param softmiss 1 if it was a softmiss
+	 * @param hardmiss 1 if it was a hardmiss
+	 * @param value The value being written or read
 	 */
+	public void generateOutputString(String addr, int readWrite, int hit, int softmiss, int hardmiss, String value) {
+		String temp = (addr + "," + readWrite + "," + softmiss + "," + hardmiss + "," + hit + "," + alg.getDirtyBitSet() + "," + value + "\n");
+		this.outputString += temp;
+		
+	}
 
 	/**
 	 * Outputs CSV File with Statistics
 	 */	
 	public File outputFile() {
-		File file = new File("output.csv");
+		File file = new File(this.testfileName + "-output.csv");
 		if (!file.exists()) {
 			try {
 				file.createNewFile();
@@ -196,12 +201,15 @@ public class OS {
 		}
 		try {
 			FileWriter writer = new FileWriter(file);
-			writer.write("Hit,Soft,Hard\n");
-			writer.write(processor.getHit() + "," + processor.getSoftmiss() + "," + processor.getHardmiss() + "\n");
+			writer.write("addr,R/W,Softmiss,Hardmiss,Hit,DirtySet,Value\n");
+			writer.write(this.outputString);
 			writer.close();
+			System.out.println("Written output to: " + this.testfileName + "-output.csv");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return file;
 	}
+	
+
 }
